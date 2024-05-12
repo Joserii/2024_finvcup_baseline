@@ -37,7 +37,7 @@ class Inferencer(object):
         return model
 
     def eval_embedding(self, speech_path, num_frames=200, max_audio=48000, channel='left'):
-        #处理音频
+        # 处理音频
         audio, _  = soundfile.read(speech_path)
 
         max_audio = num_frames*80
@@ -49,10 +49,10 @@ class Inferencer(object):
         for asf in startframe:
             feats.append(audio[int(asf):int(asf)+max_audio])
 
-        feats = np.stack(feats, axis = 0).astype(np.float)
+        feats = np.stack(feats, axis = 0).astype(np.float64)
         data = torch.FloatTensor(feats).cuda()
         
-        #推断
+        # 推断
         with torch.no_grad():
             outputs = self.model.forward(data)
             outputs = torch.mean(outputs, dim=0).view(1, -1)
@@ -82,12 +82,3 @@ if __name__=="__main__":
     print('model inferring...')
     main(df_test["wav_path"].tolist(), infer, res_path=args.save_path)
     print('done!')
-    
-        
-    
-    
-    
-    
-    
-    
-    

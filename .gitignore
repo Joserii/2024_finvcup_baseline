@@ -1,0 +1,8 @@
+data/
+exps/
+submit/
+
+*.csv
+
+utils/__pycache__/
+*.pyc

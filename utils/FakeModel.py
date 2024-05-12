@@ -67,13 +67,15 @@ class FakeModel(nn.Module):
             startframe = numpy.linspace(0, audio.shape[0]-max_audio, num=5)
             for asf in startframe:
                 feats.append(audio[int(asf):int(asf)+max_audio])
-            feats = numpy.stack(feats, axis = 0).astype(numpy.float)
+            feats = numpy.stack(feats, axis = 0).astype(numpy.float64)
             data_2 = torch.FloatTensor(feats).to(self.device)
             # Speaker embeddings
             with torch.no_grad():
                 output = self.speaker_encoder.forward(data_2)
                 output = torch.mean(output, dim=0).view(1, -1)
             outputs = torch.cat((outputs, output), 0)
+        print(outputs.shape)
+        print(outputs)
         acc, recall, prec, F1 = metrics_scores(outputs, torch.tensor(label_list).to(self.device))
                 
         return acc, recall, F1*100

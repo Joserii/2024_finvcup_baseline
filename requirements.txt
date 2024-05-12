@@ -1,0 +1,12 @@
+torch
+torchaudio
+pydub
+numba
+numpy
+pandas
+scipy
+scikit-learn
+tqdm
+SoundFile
+librosa
+pydub

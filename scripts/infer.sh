@@ -1,0 +1,1 @@
+python inference.py --model_path exps/model/model_0074.model --save_path submit/submit_0074.csv
