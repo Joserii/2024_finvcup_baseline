@@ -4,18 +4,27 @@ import torch, sys, os, tqdm, numpy, soundfile, time, pickle
 import torch.nn as nn
 from utils.tools import *
 from utils.CNN import CNN
+#from utils.RawNet3 import RawNet3
 import pandas as pd
-
-
+from utils.loss import AAMsoftmax
+import torch
+import torch.nn as nn
+from utils.ECAPA import ECAPA_TDNN
+#rom asteroid_filterbanks import Encoder, ParamSincFB
+#from RawNetBasicBlock import Bottle2neck, PreEmphasis
+#from models.RawNetBasicBlock import Bottle2neck, PreEmphasis
 class FakeModel(nn.Module):
     def __init__(self, lr, lr_decay, n_class, device, test_step, **kwargs):
         super(FakeModel, self).__init__()
         ## ResNet
         self.device = device
-        self.speaker_encoder = CNN(in_features=1, nclass=n_class).to(self.device)
         
-        ## Classifier
-        self.speaker_loss = nn.CrossEntropyLoss()
+        #self.speaker_encoder=RawNet3(Bottle2neck,model_scale=8,context=True,summed=True,encoder_type="ECA",nOut=256,out_bn=False,sinc_stride=10,log_sinc=True,norm_sinc="mean",grad_mult=1,)
+        self.speaker_encoder = ECAPA_TDNN(C=1024).to(self.device)
+        self.speaker_loss = AAMsoftmax(n_class=2, m=0.2, s=30).to(self.device)
+        self.class_loss = nn.CrossEntropyLoss()
+        # ## Classifier
+        # self.speaker_loss = nn.CrossEntropyLoss()
         
         self.optim           = torch.optim.Adam(self.parameters(), lr = lr, weight_decay = 2e-5)
         self.scheduler       = torch.optim.lr_scheduler.StepLR(self.optim, step_size = test_step, gamma=lr_decay)
@@ -30,8 +39,10 @@ class FakeModel(nn.Module):
         for num, (data, labels) in enumerate(loader, start = 1):
             self.zero_grad()
             labels            = torch.LongTensor(labels).to(self.device)
-            outputs = self.speaker_encoder.forward(data.to(self.device))
-            nloss = self.speaker_loss(outputs, labels)
+            
+            speaker_emb = self.speaker_encoder.forward(data.to(self.device),aug=True)
+            outputs = self.speaker_loss(speaker_emb)
+            nloss = self.class_loss(outputs, labels)
             acc_t, recall_t, prec_t, F1_t = metrics_scores(outputs, labels)
             nloss.backward()
             self.optim.step()
@@ -71,7 +82,8 @@ class FakeModel(nn.Module):
             data_2 = torch.FloatTensor(feats).to(self.device)
             # Speaker embeddings
             with torch.no_grad():
-                output = self.speaker_encoder.forward(data_2)
+                speaker_emb = self.speaker_encoder.forward(data_2,aug=True)
+                output= self.speaker_loss(speaker_emb)
                 output = torch.mean(output, dim=0).view(1, -1)
             outputs = torch.cat((outputs, output), 0)
         acc, recall, prec, F1 = metrics_scores(outputs, torch.tensor(label_list).to(self.device))

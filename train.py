@@ -10,15 +10,15 @@ parser.add_argument('--device',      type=str,   default='cuda:0',       help='D
 ## Training Settings
 parser.add_argument('--num_frames', type=int,   default=200,     help='Duration of the input segments, eg: 200 for 2 second')
 parser.add_argument('--max_epoch',  type=int,   default=80,      help='Maximum number of epochs')
-parser.add_argument('--batch_size', type=int,   default=32,     help='Batch size')
+parser.add_argument('--batch_size', type=int,   default=128,     help='Batch size')
 parser.add_argument('--n_cpu',      type=int,   default=4,       help='Number of loader threads')
 parser.add_argument('--test_step',  type=int,   default=1,       help='Test and save every [test_step] epochs')
 parser.add_argument('--lr',         type=float, default=0.001,   help='Learning rate')
 parser.add_argument("--lr_decay",   type=float, default=0.97,    help='Learning rate decay every [test_step] epochs')
 
 ## Training and evaluation path/lists, save path
-parser.add_argument('--train_list', type=str,   default="./data/finvcup9th_1st_ds4/finvcup9th_1st_ds4_train_data.csv",     help='The path of the training list, eg:"/data08/VoxCeleb2/train_list.txt" in my case')
-parser.add_argument('--eval_list',  type=str,   default="./data/finvcup9th_1st_ds4/finvcup9th_1st_ds4_valid_data.csv",              help='The path of the evaluation list, eg:"/data08/VoxCeleb1/veri_test2.txt" in my case')
+parser.add_argument('--train_list', type=str,   default="./finvcup9th_1st_ds4/finvcup9th_1st_ds4_train_data.csv",     help='The path of the training list, eg:"/data08/VoxCeleb2/train_list.txt" in my case')
+parser.add_argument('--eval_list',  type=str,   default="./finvcup9th_1st_ds4/finvcup9th_1st_ds4_valid_data.csv",              help='The path of the evaluation list, eg:"/data08/VoxCeleb1/veri_test2.txt" in my case')
 parser.add_argument('--save_path',  type=str,   default="./exps",                                     help='Path to save the score.txt and models')
 parser.add_argument('--initial_model',  type=str,   default="",                                          help='Path of the initial_model')
 
