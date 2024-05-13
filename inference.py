@@ -51,7 +51,7 @@ class Inferencer(object):
         for asf in startframe:
             feats.append(audio[int(asf):int(asf)+max_audio])
 
-        feats = np.stack(feats, axis = 0).astype(np.float)
+        feats = np.stack(feats, axis = 0).astype(np.float64)
         data = torch.FloatTensor(feats).cuda()
         
         #推断
@@ -75,7 +75,7 @@ def main(speech_list, infer, res_path):
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description = "DeepFake audio")
     parser.add_argument('--model_path',      type=str,   default='exps/model/model_0001.model',       help='Model checkpoint path')
-    parser.add_argument('--test_path',      type=str,   default='finvcup9th_1st_ds4/finvcup9th_1st_ds4_test_data.csv',       help='Path of test file, strictly same with the original file')
+    parser.add_argument('--test_path',      type=str,   default='./data/finvcup9th_1st_ds4/finvcup9th_1st_ds4_test_data.csv',       help='Path of test file, strictly same with the original file')
     parser.add_argument('--save_path', type=str, default='./submit/submit.csv', help='Path of result')
     parser.add_argument('--n_class', type=int,   default=2,   help='Number of class')
     parser.add_argument('--device',      type=str,   default='cuda:0',       help='Device training on ')
