@@ -3,6 +3,7 @@
 import argparse, glob, os, warnings, time
 from utils.tools import *
 from utils.FakeModel import FakeModel
+from utils.ECAPA import ECAPA_TDNN
 from utils.CNN import CNN
 import soundfile
 import torch
@@ -13,17 +14,20 @@ import pandas as pd
 import argparse
 
 class Inferencer(object):
-    def __init__(self, model_path):
-        self.model = self.load_model(model_path)
+    def __init__(self, model,model_path):
+        self.model = self.load_model(model,model_path)
 
-    def load_model(self, model_path):
-        model = CNN(in_features=1)
+    def load_model(self,model, model_path):
+        
         self_state = model.state_dict()
+        #self.speaker_loss = AAMsoftmax(n_class=2, m=0.2, s=30)
         loaded_state = torch.load(model_path)
         for name, param in loaded_state.items():
             origname = name
             if name not in self_state:
+
                 name = name.replace("speaker_encoder.", "")
+
                 if name not in self_state:
                     print("%s is not in the model."%origname)
                     continue
@@ -54,7 +58,8 @@ class Inferencer(object):
         
         #推断
         with torch.no_grad():
-            outputs = self.model.forward(data)
+            outputs = self.model.speaker_encoder.forward(data)
+            #outputs=self.model.speaker_loss.forward(speak_embd)
             outputs = torch.mean(outputs, dim=0).view(1, -1)
 
         return outputs.detach().cpu().numpy().argmax(axis=1)[0]
@@ -72,11 +77,18 @@ def main(speech_list, infer, res_path):
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description = "DeepFake audio")
     parser.add_argument('--model_path',      type=str,   default='exps/model/model_0001.model',       help='Model checkpoint path')
-    parser.add_argument('--test_path',      type=str,   default='data/finvcup9th_1st_ds4/finvcup9th_1st_ds4_test_data.csv',       help='Path of test file, strictly same with the original file')
+    parser.add_argument('--test_path',      type=str,   default='finvcup9th_1st_ds4/finvcup9th_1st_ds4_test_data.csv',       help='Path of test file, strictly same with the original file')
     parser.add_argument('--save_path', type=str, default='./submit/submit.csv', help='Path of result')
+    parser.add_argument('--n_class', type=int,   default=2,   help='Number of class')
+    parser.add_argument('--device',      type=str,   default='cuda:0',       help='Device training on ')
+    parser.add_argument('--test_step',  type=int,   default=1,       help='Test and save every [test_step] epochs')
+    parser.add_argument('--lr',         type=float, default=0.001,   help='Learning rate')
+    parser.add_argument("--lr_decay",   type=float, default=0.97,    help='Learning rate decay every [test_step] epochs')
+
     args = parser.parse_args()
     print('loading model...')
-    infer = Inferencer(args.model_path)
+    model = FakeModel(**vars(args))
+    infer = Inferencer(model,args.model_path)
     df_test = pd.read_csv(args.test_path)
    
     print('model inferring...')
