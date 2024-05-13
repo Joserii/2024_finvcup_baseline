@@ -25,8 +25,8 @@ class AAMsoftmax(nn.Module):
         self.mm = math.sin(math.pi - self.m) * self.m
 
     def forward(self, x):
-
         cosine = F.linear(F.normalize(x), F.normalize(self.weight))
+        print(cosine)
         sine = torch.sqrt((1.0 - torch.mul(cosine, cosine)).clamp(0, 1))
         phi = cosine * self.cos_m - sine * self.sin_m
         phi = torch.where((cosine - self.th) > 0, phi, cosine - self.mm)

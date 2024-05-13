@@ -97,7 +97,7 @@ class FakeModel(nn.Module):
         for idx, file in tqdm.tqdm(enumerate(setfiles), total = len(setfiles)):
             audio, _ = soundfile.read(file)
             output = self.extract_speaker_embd(model=model, fn=file, gpu=gpu).mean(0)
-            print(f"file: {file}, output.shape: {output.shape}") # [1, 256]
+            print(f"file: {file}, output.shape: {output.shape}") # [256]
             output = self.speaker_loss(output) # [5, 2]
             output = torch.mean(output, dim=0).view(1, -1) # [1, 2]
         

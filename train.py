@@ -27,6 +27,7 @@ parser.add_argument('--n_class', type=int,   default=2,   help='Number of class'
 
 ## Command
 parser.add_argument('--eval',    dest='eval', action='store_true', help='Only do evaluation')
+parser.add_argument('--rawnet',  dest='rawnet', action='store_true', help='Test RawNet Model')
 
 ## Initialization
 warnings.simplefilter("ignore")
@@ -54,6 +55,7 @@ if args.eval == True:
 
     quit()
 
+
 ## If initial_model is exist, system will train from the initial_model
 if args.initial_model != "":
     print("Model %s loaded from previous state!"%args.initial_model)
@@ -79,6 +81,8 @@ score_file = open(args.score_save_path, "a+")
 
 while(1):
     if args.eval == True:
+        break
+    if args.rawnet == True:
         break
     ## Training for one epoch
     loss, lr, acc, recall, f1 = s.train_network(epoch = epoch, loader = trainLoader)
