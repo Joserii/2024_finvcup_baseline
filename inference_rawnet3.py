@@ -60,10 +60,10 @@ def main(args: Dict) -> None:
         ).mean(0)
         # print(f"file: {file}, output.shape: {output.shape}")
         outputs.append(output)
-    outputs = np.array(outputs.cpu().numpy())
-    np.save(args.out_dir, outputs)
-    df_result = pd.DataFrame(outputs, columns=["speech_name", "pred_label"])
-    df_result.to_csv(args.save_path, index=False, header=None)
+    # 保存embedding
+    outputs = [output.cpu() for output in outputs]
+    output_numpy_list = [output.detach().numpy() for output in outputs]
+    np.save('output.npy', output_numpy_list)
     return
 
 # 提取说话人embedding
